@@ -12,9 +12,11 @@ const serpiente = [
 
 let intervaloSerpiente; 
 let direccionActual = "derecha";
+let comida = { x: 5, y: 5 };
 
 
 // Primera pintura del juego al cargar la página
+generarComida();
 dibujarTodo();
 
 // =========================
@@ -28,6 +30,7 @@ function limpiarCanvas() {
 function dibujarTodo() {
   limpiarCanvas();
   dibujarTablero();
+  pintarComida();
   pintarSerpiente();
 }
 
@@ -116,5 +119,33 @@ function moverSerpiente() {
   } else if (direccionActual === "abajo") {
     moverAbajo();
   }
+  if (atrapaComida() === true) {
+    let etiquetaPuntaje = document.getElementById("puntaje");
+    let puntosActuales = parseInt(etiquetaPuntaje.innerText);
+    etiquetaPuntaje.innerText = puntosActuales + 10;
+    let ultimaParte = serpiente[serpiente.length - 1];
+    serpiente.push({ x: ultimaParte.x, y: ultimaParte.y });  
+    generarComida();
+  }  
   dibujarTodo();
+}
+
+function generarComida() {
+  let maxCol = canvas.width / TAMANIO_CELDA;
+  let maxFil = canvas.height / TAMANIO_CELDA;
+  comida.x = Math.floor(Math.random() * maxCol);
+  comida.y = Math.floor(Math.random() * maxFil);
+}
+
+function pintarComida() {
+  pintarParte(comida.x, comida.y, "#22c55e"); 
+}
+
+function atrapaComida() {
+  let cabeza = serpiente[0];
+  if (cabeza.x === comida.x && cabeza.y === comida.y) {
+    return true;
+  } else {
+    return false;
+  }
 }
