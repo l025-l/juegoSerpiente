@@ -13,6 +13,8 @@ const serpiente = [
 let intervaloSerpiente; 
 let direccionActual = "derecha";
 let comida = { x: 5, y: 5 };
+let velocidad = 300; 
+let gameOver = false;
 
 
 // Primera pintura del juego al cargar la página
@@ -67,7 +69,16 @@ function pintarSerpiente() {
 }
 
 function cambiarDireccion(nuevaDireccion) {
-  direccionActual = nuevaDireccion;
+  if (nuevaDireccion === "derecha" && direccionActual !== "izquierda") {
+    direccionActual = nuevaDireccion;
+  } else if (nuevaDireccion === "izquierda" && direccionActual !== "derecha") {
+    direccionActual = nuevaDireccion;
+  } else if (nuevaDireccion === "arriba" && direccionActual !== "abajo") {
+    direccionActual = nuevaDireccion;
+  } else if (nuevaDireccion === "abajo" && direccionActual !== "arriba") {
+    direccionActual = nuevaDireccion;
+  }  
+  
 }
 
 function moverDerecha() {
@@ -99,9 +110,11 @@ function moverAbajo() {
 }
 
 function iniciarJuego() {
+  if (gameOver) return;
   clearInterval(intervaloSerpiente);
-  intervaloSerpiente = setInterval(moverSerpiente, 500);
+  intervaloSerpiente = setInterval(moverSerpiente, velocidad);
   document.getElementById("estado").innerText = "Jugando";
+  document.getElementById("mensaje").innerText = "¡Buena suerte!"
 }
 
 function pausarJuego() {
@@ -110,6 +123,8 @@ function pausarJuego() {
 }
 
 function moverSerpiente() {
+  if (gameOver) return;
+
   if (direccionActual === "derecha") {
     moverDerecha();
   } else if (direccionActual === "izquierda") {
@@ -119,6 +134,15 @@ function moverSerpiente() {
   } else if (direccionActual === "abajo") {
     moverAbajo();
   }
+
+  if (verificarColisionBordes()) {
+    gameOver = true;
+    clearInterval(intervaloSerpiente);
+    document.getElementById("estado").innerText = "GAME OVER 💀";
+    document.getElementById("mensaje").innerText = "¡Chocaste! Presiona Reiniciar.";
+    return;
+    }
+
   if (atrapaComida() === true) {
     let etiquetaPuntaje = document.getElementById("puntaje");
     let puntosActuales = parseInt(etiquetaPuntaje.innerText);
@@ -148,4 +172,28 @@ function atrapaComida() {
   } else {
     return false;
   }
+}
+
+function verificarColisionBordes() {
+  let cabeza = serpiente[0];
+  let maxCol = canvas.width / TAMANIO_CELDA;
+  let maxFil = canvas.height / TAMANIO_CELDA;
+  if (cabeza.x < 0 || cabeza.x >= maxCol || cabeza.y < 0 || cabeza.y >= maxFil) {
+    return true;
+  }
+  return false;
+}
+
+function reiniciarJuego() {
+  gameOver = false;
+  direccionActual = "derecha";
+  velocidad = 300;
+  serpiente.length = 0; 
+  serpiente.push({ x: 10, y: 10 }, { x: 9, y: 10 }, { x: 8, y: 10 }, { x: 8, y: 11 });
+  document.getElementById("puntaje").innerText = "0";
+  document.getElementById("estado").innerText = "Listo";
+  document.getElementById("mensaje").innerText = "Juego reiniciado. Presiona Iniciar.";
+  clearInterval(intervaloSerpiente);
+  generarComida();
+  dibujarTodo();
 }
